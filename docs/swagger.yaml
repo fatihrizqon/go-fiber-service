@@ -1,0 +1,1269 @@
+basePath: /
+definitions:
+  request.AkunCreateRequest:
+    properties:
+      id_akun:
+        type: string
+      id_akun_subgrup:
+        type: string
+      jenis:
+        type: integer
+      kode:
+        maxLength: 255
+        minLength: 1
+        type: string
+      nama:
+        maxLength: 255
+        minLength: 1
+        type: string
+      saldo_awal:
+        type: number
+      status:
+        type: integer
+    required:
+    - id_akun_subgrup
+    - jenis
+    - kode
+    - nama
+    type: object
+  request.AkunGrupCreateRequest:
+    properties:
+      kode:
+        maxLength: 12
+        type: string
+      nama:
+        maxLength: 64
+        type: string
+    required:
+    - kode
+    - nama
+    type: object
+  request.AkunGrupUpdateRequest:
+    properties:
+      id:
+        type: string
+      kode:
+        maxLength: 12
+        type: string
+      nama:
+        maxLength: 64
+        type: string
+    required:
+    - kode
+    - nama
+    type: object
+  request.AkunSubgrupCreateRequest:
+    properties:
+      id_akun_grup:
+        type: string
+      kode:
+        maxLength: 255
+        minLength: 1
+        type: string
+      nama:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - id_akun_grup
+    - kode
+    - nama
+    type: object
+  request.AkunSubgrupUpdateRequest:
+    properties:
+      id:
+        type: string
+      id_akun_grup:
+        type: string
+      kode:
+        maxLength: 255
+        minLength: 1
+        type: string
+      nama:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - id_akun_grup
+    - kode
+    - nama
+    type: object
+  request.AkunUpdateRequest:
+    properties:
+      id:
+        type: string
+      id_akun:
+        type: string
+      id_akun_subgrup:
+        type: string
+      jenis:
+        type: integer
+      kode:
+        maxLength: 255
+        minLength: 1
+        type: string
+      nama:
+        maxLength: 255
+        minLength: 1
+        type: string
+      saldo_awal:
+        type: number
+      status:
+        type: integer
+    required:
+    - id_akun_subgrup
+    - jenis
+    - kode
+    - nama
+    type: object
+  request.JurnalCreateRequest:
+    properties:
+      created_by:
+        type: string
+      id_jurnal_tipe:
+        type: string
+      jurnal_detail:
+        items:
+          $ref: '#/definitions/request.JurnalDetailCreateRequest'
+        type: array
+      keterangan:
+        type: string
+      nota:
+        type: string
+      tanggal:
+        type: string
+    required:
+    - id_jurnal_tipe
+    - jurnal_detail
+    - keterangan
+    type: object
+  request.JurnalDetailCreateRequest:
+    properties:
+      id_akun:
+        type: string
+      id_jurnal:
+        type: string
+      jenis:
+        type: integer
+      nominal:
+        type: number
+    required:
+    - id_akun
+    - id_jurnal
+    - jenis
+    - nominal
+    type: object
+  request.JurnalDetailUpdateRequest:
+    properties:
+      id:
+        type: string
+      id_akun:
+        type: string
+      id_jurnal:
+        type: string
+      jenis:
+        type: integer
+      nominal:
+        type: number
+    required:
+    - id_akun
+    - id_jurnal
+    - jenis
+    - nominal
+    type: object
+  request.JurnalTipeCreateRequest:
+    properties:
+      nama:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - nama
+    type: object
+  request.JurnalTipeUpdateRequest:
+    properties:
+      id:
+        type: string
+      nama:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - nama
+    type: object
+  request.JurnalUpdateRequest:
+    properties:
+      id:
+        type: string
+      id_jurnal_tipe:
+        type: string
+      jurnal_detail:
+        items:
+          $ref: '#/definitions/request.JurnalDetailUpdateRequest'
+        type: array
+      keterangan:
+        type: string
+      nota:
+        type: string
+      tanggal:
+        type: string
+      updated_by:
+        type: string
+    required:
+    - id_jurnal_tipe
+    - jurnal_detail
+    - keterangan
+    type: object
+  request.LoginRequest:
+    properties:
+      email:
+        example: johndoe@example.com
+        maxLength: 20
+        minLength: 1
+        type: string
+      password:
+        example: yoursecretpassword
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.UserCreateRequest:
+    properties:
+      email:
+        minLength: 1
+        type: string
+      name:
+        minLength: 1
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - username
+    type: object
+  request.UserUpdateRequest:
+    properties:
+      email:
+        minLength: 1
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 20
+        minLength: 1
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - email
+    - name
+    - username
+    type: object
+  response.AuthJSON:
+    properties:
+      access_token:
+        type: string
+      message:
+        type: string
+      status:
+        type: integer
+      user:
+        $ref: '#/definitions/response.UserInfo'
+    type: object
+  response.JSON:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/response.Meta'
+      status:
+        type: integer
+    type: object
+  response.Links:
+    properties:
+      current_page:
+        type: string
+      first_page:
+        type: string
+      last_page:
+        type: string
+      next_page:
+        type: string
+      prev_page:
+        type: string
+    type: object
+  response.Meta:
+    properties:
+      info:
+        type: string
+      links:
+        $ref: '#/definitions/response.Links'
+      page:
+        type: integer
+      page_size:
+        type: integer
+      search:
+        type: string
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  response.UserInfo:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          type: string
+        type: array
+      roles:
+        items:
+          type: string
+        type: array
+      status:
+        type: integer
+      username:
+        type: string
+    type: object
+host: 127.0.0.1:3000
+info:
+  contact:
+    email: fatihrizqon@gmail.com
+    name: Fatih Rizqon
+  description: This is an Official Documentation for Go REST API with Fiber Framework
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Go REST API with Fiber Framework
+  version: "1.0"
+paths:
+  /api/v1/akun:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all akun records with pagination
+      parameters:
+      - description: Search keyword
+        in: query
+        name: search
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all records.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get all akun
+      tags:
+      - Akun
+    post:
+      consumes:
+      - application/json
+      description: Store a new akun record
+      parameters:
+      - description: Akun Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AkunCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: A new record has been stored.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Create akun
+      tags:
+      - Akun
+  /api/v1/akun/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a akun record by ID
+      parameters:
+      - description: Akun ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been deleted.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: Akun not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Delete akun
+      tags:
+      - Akun
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single akun by its ID
+      parameters:
+      - description: Akun ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved selected record.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: Akun not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get akun by ID
+      tags:
+      - Akun
+    put:
+      consumes:
+      - application/json
+      description: Update akun data by ID
+      parameters:
+      - description: Akun ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Akun Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AkunUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been updated.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: Akun not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Update akun
+      tags:
+      - Akun
+  /api/v1/akun_grup:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all akun_grup records with pagination
+      parameters:
+      - description: Search keyword
+        in: query
+        name: search
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all records.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get all akun_grup
+      tags:
+      - AkunGrup
+    post:
+      consumes:
+      - application/json
+      description: Store a new akun_grup record
+      parameters:
+      - description: AkunGrup Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AkunGrupCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: A new record has been stored.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Create akun_grup
+      tags:
+      - AkunGrup
+  /api/v1/akun_grup/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a akun_grup record by ID
+      parameters:
+      - description: AkunGrup ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been deleted.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: AkunGrup not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Delete akun_grup
+      tags:
+      - AkunGrup
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single akun_grup by its ID
+      parameters:
+      - description: AkunGrup ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved selected record.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: AkunGrup not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get akun_grup by ID
+      tags:
+      - AkunGrup
+    put:
+      consumes:
+      - application/json
+      description: Update akun_grup data by ID
+      parameters:
+      - description: AkunGrup ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: AkunGrup Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AkunGrupUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been updated.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: AkunGrup not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Update akun_grup
+      tags:
+      - AkunGrup
+  /api/v1/akun_subgrup:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all akun_subgrup records with pagination
+      parameters:
+      - description: Search keyword
+        in: query
+        name: search
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all records.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get all akun_subgrup
+      tags:
+      - AkunSubgrup
+    post:
+      consumes:
+      - application/json
+      description: Store a new akun_subgrup record
+      parameters:
+      - description: AkunSubgrup Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AkunSubgrupCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: A new record has been stored.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Create akun_subgrup
+      tags:
+      - AkunSubgrup
+  /api/v1/akun_subgrup/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a akun_subgrup record by ID
+      parameters:
+      - description: AkunSubgrup ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been deleted.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: AkunSubgrup not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Delete akun_subgrup
+      tags:
+      - AkunSubgrup
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single akun_subgrup by its ID
+      parameters:
+      - description: AkunSubgrup ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved selected record.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: AkunSubgrup not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get akun_subgrup by ID
+      tags:
+      - AkunSubgrup
+    put:
+      consumes:
+      - application/json
+      description: Update akun_subgrup data by ID
+      parameters:
+      - description: AkunSubgrup ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: AkunSubgrup Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AkunSubgrupUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been updated.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: AkunSubgrup not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Update akun_subgrup
+      tags:
+      - AkunSubgrup
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return a JWT token in a cookie
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.AuthJSON'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "401":
+          description: Authentication failed
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: User login
+      tags:
+      - Auth
+  /api/v1/auth/logout:
+    post:
+      description: |-
+        Logout user dengan menghapus access_token dan refresh_token dari cookie,
+        serta memasukkan refresh token ke blacklist.
+      responses:
+        "200":
+          description: Successfully logged out
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Logout user
+      tags:
+      - Auth
+  /api/v1/auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the current authenticated user's information using the
+        access token stored in HttpOnly cookie or Authorization header.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User info retrieved
+          schema:
+            $ref: '#/definitions/response.AuthJSON'
+        "401":
+          description: Invalid or missing access token
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get authenticated user info
+      tags:
+      - Auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh the access token using the refresh token from HttpOnly
+        cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Access token refreshed
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "401":
+          description: Invalid or missing refresh token
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Refresh access token
+      tags:
+      - Auth
+  /api/v1/jurnal:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all jurnal records with pagination
+      parameters:
+      - description: Search keyword
+        in: query
+        name: search
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all records.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get all jurnal
+      tags:
+      - Jurnal
+    post:
+      consumes:
+      - application/json
+      description: Store a new jurnal record
+      parameters:
+      - description: Jurnal Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.JurnalCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: A new record has been stored.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Create jurnal
+      tags:
+      - Jurnal
+  /api/v1/jurnal/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a jurnal record by ID
+      parameters:
+      - description: Jurnal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been deleted.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: Jurnal not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Delete jurnal
+      tags:
+      - Jurnal
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single jurnal by its ID
+      parameters:
+      - description: Jurnal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved selected record.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: Jurnal not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get jurnal by ID
+      tags:
+      - Jurnal
+    put:
+      consumes:
+      - application/json
+      description: Update jurnal data by ID
+      parameters:
+      - description: Jurnal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Jurnal Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.JurnalUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been updated.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: Jurnal not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Update jurnal
+      tags:
+      - Jurnal
+  /api/v1/jurnal_tipe:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all jurnal_tipe records with pagination
+      parameters:
+      - description: Search keyword
+        in: query
+        name: search
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all records.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get all jurnal_tipe
+      tags:
+      - JurnalTipe
+    post:
+      consumes:
+      - application/json
+      description: Store a new jurnal_tipe record
+      parameters:
+      - description: JurnalTipe Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.JurnalTipeCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: A new record has been stored.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Create jurnal_tipe
+      tags:
+      - JurnalTipe
+  /api/v1/jurnal_tipe/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a jurnal_tipe record by ID
+      parameters:
+      - description: JurnalTipe ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been deleted.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: JurnalTipe not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Delete jurnal_tipe
+      tags:
+      - JurnalTipe
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single jurnal_tipe by its ID
+      parameters:
+      - description: JurnalTipe ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved selected record.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: JurnalTipe not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get jurnal_tipe by ID
+      tags:
+      - JurnalTipe
+    put:
+      consumes:
+      - application/json
+      description: Update jurnal_tipe data by ID
+      parameters:
+      - description: JurnalTipe ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: JurnalTipe Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.JurnalTipeUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been updated.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: JurnalTipe not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Update jurnal_tipe
+      tags:
+      - JurnalTipe
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all user records with pagination
+      parameters:
+      - description: Search keyword
+        in: query
+        name: search
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all records.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Store a new user record
+      parameters:
+      - description: User Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: A new record has been stored.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Create user
+      tags:
+      - Users
+  /api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user record by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been deleted.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single user by its ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved selected record.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update user data by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Selected record has been updated.
+          schema:
+            $ref: '#/definitions/response.JSON'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.JSON'
+      summary: Update user
+      tags:
+      - Users
+swagger: "2.0"

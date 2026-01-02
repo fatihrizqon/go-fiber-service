@@ -153,15 +153,23 @@ go test ./...
 ## 📁 Project Structure (Simplified)
 
 ```
-├── cmd/
 ├── config/
+├── docs/          # Swagger generated files
+├── helper/
 ├── internal/
 │   ├── handler/
 │   ├── service/
 │   ├── repository/
 │   ├── entity/
 │   └── middleware/
-├── docs/          # Swagger generated files
+├── logger/
+├── middleware/
+├── router/
+├── test/
+├── .env.example
+├── .gitignore
+├── go.mod
+├── go.sum
 ├── main.go
 └── README.md
 ```

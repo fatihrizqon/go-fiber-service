@@ -114,6 +114,14 @@ JWT handling is isolated within the authentication layer to keep business logic 
 
 This project uses **Swag** to generate Swagger documentation automatically from code annotations.
 
+### Install Swag CLI
+
+Make sure you have Go installed, then run:
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
 ### Generate Swagger Docs
 
 ```bash

@@ -11,14 +11,15 @@ func (User) TableName() string {
 }
 
 type User struct {
-	Id        uuid.UUID `gorm:"type:uuid; primaryKey; default:gen_random_uuid();" json:"id"`
-	Username  string    `gorm:"type:character varying; not null; unique;" json:"username"`
-	Name      string    `gorm:"type:character varying; not null;" json:"name"`
-	Email     string    `gorm:"type:character varying; not null; unique;" json:"email"`
-	Password  string    `gorm:"type:character varying; not null;" json:"password"`
-	Status    int       `gorm:"type:int; not null; default:1;" json:"status"`
-	CreatedAt time.Time `gorm:"autoCreateTime;" json:"created_at"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime;" json:"updated_at"`
+	Id              uuid.UUID `gorm:"type:uuid; primaryKey; default:gen_random_uuid();" json:"id"`
+	Username        string    `gorm:"type:character varying; not null; unique;" json:"username"`
+	Name            string    `gorm:"type:character varying; not null;" json:"name"`
+	Email           string    `gorm:"type:character varying; not null; unique;" json:"email"`
+	Status          int       `gorm:"type:int; not null; default:1;" json:"status"`
+	EmailVerifiedAt time.Time `gorm:"autoCreateTime;" json:"email_verified_at"`
+	Password        string    `gorm:"type:character varying; not null;" json:"password"`
+	CreatedAt       time.Time `gorm:"autoCreateTime;" json:"created_at"`
+	UpdatedAt       time.Time `gorm:"autoUpdateTime;" json:"updated_at"`
 }
 
 func (User) SearchableFields() []string {

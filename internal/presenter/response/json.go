@@ -10,13 +10,14 @@ type AuthJSON struct {
 }
 
 type UserInfo struct {
-	Id          uuid.UUID `json:"id"`
-	Username    string    `json:"username"`
-	Name        string    `json:"name"`
-	Email       string    `json:"email"`
-	Status      int       `json:"status"`
-	Roles       []string  `json:"roles"`
-	Permissions []string  `json:"permissions"`
+	Id              uuid.UUID `json:"id"`
+	Username        string    `json:"username"`
+	Name            string    `json:"name"`
+	Email           string    `json:"email"`
+	Status          int       `json:"status"`
+	EmailVerifiedAt string    `json:"email_verified_at"`
+	Roles           []string  `json:"roles"`
+	Permissions     []string  `json:"permissions"`
 }
 
 type SelectJSON struct {

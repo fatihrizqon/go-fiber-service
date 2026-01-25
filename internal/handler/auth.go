@@ -62,11 +62,12 @@ func (handler *AuthHandler) Login(ctx *fiber.Ctx) error {
 		Message: "you are authenticated",
 		Status:  fiber.StatusOK,
 		User: response.UserInfo{
-			Id:       result.User.Id,
-			Username: result.User.Username,
-			Name:     result.User.Name,
-			Email:    result.User.Email,
-			Status:   result.User.Status,
+			Id:              result.User.Id,
+			Username:        result.User.Username,
+			Name:            result.User.Name,
+			Email:           result.User.Email,
+			Status:          result.User.Status,
+			EmailVerifiedAt: result.User.EmailVerifiedAt.Format(time.RFC3339),
 		},
 		AccessToken: accessToken,
 	})

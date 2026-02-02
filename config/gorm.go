@@ -19,11 +19,18 @@ func NewDatabase(viper *viper.Viper, log *logrus.Logger) *gorm.DB {
 	port := viper.GetInt("database.port")
 	database := viper.GetString("database.name")
 
-	credentials := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, database)
+	maxIdle := viper.GetInt("database.pool.idle")
+	maxOpen := viper.GetInt("database.pool.max")
+	lifetime := viper.GetInt("database.pool.lifetime")
+
+	credentials := fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		host, port, username, password, database,
+	)
 
 	db, err := gorm.Open(postgres.Open(credentials), &gorm.Config{
 		Logger: logger.New(&logrusWriter{Logger: log}, logger.Config{
-			SlowThreshold:             time.Second * 5,
+			SlowThreshold:             5 * time.Second,
 			Colorful:                  false,
 			IgnoreRecordNotFoundError: true,
 			ParameterizedQueries:      true,
@@ -32,7 +39,17 @@ func NewDatabase(viper *viper.Viper, log *logrus.Logger) *gorm.DB {
 	})
 	util.PanicIfError(err)
 
-	fmt.Println("Database connection has been established.")
+	sqlDB, err := db.DB()
+	util.PanicIfError(err)
+
+	sqlDB.SetMaxIdleConns(maxIdle)
+	sqlDB.SetMaxOpenConns(maxOpen)
+	sqlDB.SetConnMaxLifetime(time.Duration(lifetime) * time.Second)
+
+	log.Infof(
+		"Database connected (pool: idle=%d max=%d lifetime=%ds)",
+		maxIdle, maxOpen, lifetime,
+	)
 
 	return db
 }

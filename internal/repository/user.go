@@ -3,15 +3,15 @@ package repository
 import (
 	"strings"
 
-	"github.com/fatihrizqon/go-fiber-service/helper"
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type IUserRepository interface {
 	Create(entity.User) (entity.User, error)
-	FindAll(page, pageSize int, search string, options helper.SearchOptions, filters entity.UserFilters) ([]entity.User, int, error)
+	FindAll(page, pageSize int, search string, options util.SearchOptions, filters entity.UserFilters) ([]entity.User, int, error)
 	FindById(entityId uuid.UUID) (entity.User, error)
 	Update(entity.User) error
 	Delete(entityId uuid.UUID) error
@@ -39,7 +39,7 @@ func (e *UserRepository) Create(entity entity.User) (entity.User, error) {
 }
 
 // FindAll implements IUserRepository with pagination.
-func (e *UserRepository) FindAll(page, pageSize int, search string, options helper.SearchOptions, filters entity.UserFilters) ([]entity.User, int, error) {
+func (e *UserRepository) FindAll(page, pageSize int, search string, options util.SearchOptions, filters entity.UserFilters) ([]entity.User, int, error) {
 	var entities []entity.User
 	var totalCount int64
 

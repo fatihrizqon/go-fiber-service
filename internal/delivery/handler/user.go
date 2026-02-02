@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"github.com/fatihrizqon/go-fiber-service/helper"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/request"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/request"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/response"
 	"github.com/fatihrizqon/go-fiber-service/internal/service"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -32,7 +32,7 @@ func (handler *UserHandler) Create(ctx *fiber.Ctx) error {
 	req := request.UserCreateRequest{}
 	err := ctx.BodyParser(&req)
 	if err != nil {
-		helper.HandleError(ctx, fiber.StatusBadRequest, err)
+		util.HandleError(ctx, fiber.StatusBadRequest, err)
 		return nil
 	}
 
@@ -64,12 +64,12 @@ func (handler *UserHandler) Create(ctx *fiber.Ctx) error {
 // @Failure 500 {object} response.JSON "Internal Server Error"
 // @Router /api/v1/users [get]
 func (handler *UserHandler) FindAll(ctx *fiber.Ctx) error {
-	page, pageSize, _ := helper.ParsePaginationParams(ctx)
+	page, pageSize, _ := util.ParsePaginationParams(ctx)
 	userFilters := handler.setUserFilters(ctx)
 
 	search := ctx.Query("search")
 	entity := entity.User{}
-	options := helper.SearchOptions{
+	options := util.SearchOptions{
 		Fields: entity.SearchableFields(),
 	}
 
@@ -92,7 +92,7 @@ func (handler *UserHandler) FindAll(ctx *fiber.Ctx) error {
 	}
 
 	baseURL := ctx.Protocol() + "://" + ctx.Hostname() + ctx.Path()
-	meta := helper.GenerateMeta(baseURL, search, page, pageSize, totalCount, nil)
+	meta := util.GenerateMeta(baseURL, search, page, pageSize, totalCount, nil)
 
 	return ctx.Status(fiber.StatusOK).JSON(response.JSON{
 		Status:  200,
@@ -116,7 +116,7 @@ func (handler *UserHandler) FindById(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	parsedId, err := uuid.Parse(id)
 	if err != nil {
-		helper.HandleError(ctx, fiber.StatusBadRequest, err)
+		util.HandleError(ctx, fiber.StatusBadRequest, err)
 		return nil
 	}
 
@@ -150,14 +150,14 @@ func (handler *UserHandler) Update(ctx *fiber.Ctx) error {
 	req := request.UserUpdateRequest{}
 	err := ctx.BodyParser(&req)
 	if err != nil {
-		helper.HandleError(ctx, fiber.StatusBadRequest, err)
+		util.HandleError(ctx, fiber.StatusBadRequest, err)
 		return nil
 	}
 
 	id := ctx.Params("id")
 	parsedId, err := uuid.Parse(id)
 	if err != nil {
-		helper.HandleError(ctx, fiber.StatusBadRequest, err)
+		util.HandleError(ctx, fiber.StatusBadRequest, err)
 		return nil
 	}
 
@@ -192,7 +192,7 @@ func (handler *UserHandler) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	parsedId, err := uuid.Parse(id)
 	if err != nil {
-		helper.HandleError(ctx, fiber.StatusBadRequest, err)
+		util.HandleError(ctx, fiber.StatusBadRequest, err)
 		return nil
 	}
 

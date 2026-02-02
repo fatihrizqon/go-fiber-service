@@ -1,15 +1,12 @@
-package helper
+package util
 
 import (
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/response"
-	"github.com/fatihrizqon/go-fiber-service/logger"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
 	"github.com/gofiber/fiber/v2"
 )
 
 func PanicIfError(err error) {
 	if err != nil {
-		log := logger.GetLogger()
-		log.WithError(err).Errorf("Panic occurred: %v", err)
 		panic(err)
 	}
 }

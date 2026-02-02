@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/fatihrizqon/go-fiber-service/helper"
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -86,7 +86,7 @@ func TestUserFindById(t *testing.T) {
 		id := c.Params("id")
 		parsedId, err := uuid.Parse(id)
 		if err != nil {
-			helper.HandleError(c, 500, err)
+			util.HandleError(c, 500, err)
 			return nil
 		}
 
@@ -102,7 +102,7 @@ func TestUserFindById(t *testing.T) {
 
 	// Test FindById
 	mockRepo.On("FindById", user1.Id).Return(user1, nil)
-	req := httptest.NewRequest("GET", "/users/1", nil)
+	req := httptest.NewRequest("GET", "/users/"+user1.Id.String(), nil)
 	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, 200, resp.StatusCode)

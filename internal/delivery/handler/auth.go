@@ -4,12 +4,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatihrizqon/go-fiber-service/helper"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/request"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/request"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/response"
 	"github.com/fatihrizqon/go-fiber-service/internal/service"
-	"github.com/fatihrizqon/go-fiber-service/logger"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -34,29 +33,20 @@ func NewAuthHandler(serv service.IAuthService) *AuthHandler {
 // @Failure 401 {object} response.JSON "Authentication failed"
 // @Router /api/v1/auth/login [post]
 func (handler *AuthHandler) Login(ctx *fiber.Ctx) error {
-	log := logger.GetLogger()
-	ip := ctx.IP()
-
 	var req request.LoginRequest
 	if err := ctx.BodyParser(&req); err != nil {
-		log.WithField("ip", ip).Error("failed to parse login request")
 		return errorResponse(ctx, fiber.StatusBadRequest, "invalid request format")
 	}
 
-	log.WithField("ip", ip).Info("user login attempt: " + req.Email)
-
 	result, err := handler.IAuthService.Login(req)
 	if err != nil {
-		log.WithField("ip", ip).Error("authentication failed: " + req.Email)
 		return errorResponse(ctx, fiber.StatusUnauthorized, "authentication failed: "+err.Error())
 	}
 
-	accessToken, _ := helper.GenerateAccessToken(result.User)
-	refreshToken, _ := helper.GenerateRefreshToken(result.User)
+	accessToken, _ := util.GenerateAccessToken(result.User)
+	refreshToken, _ := util.GenerateRefreshToken(result.User)
 
 	setAuthCookies(ctx, accessToken, refreshToken)
-
-	log.WithField("ip", ip).Info("user logged in: " + req.Email)
 
 	return ctx.Status(fiber.StatusOK).JSON(response.AuthJSON{
 		Message: "you are authenticated",
@@ -89,7 +79,7 @@ func (handler *AuthHandler) Refresh(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusUnauthorized, "refresh token required")
 	}
 
-	claims, err := helper.ParseToken(refreshToken, true)
+	claims, err := util.ParseToken(refreshToken, true)
 	if err != nil {
 		return errorResponse(ctx, fiber.StatusUnauthorized, "invalid refresh token")
 	}
@@ -102,7 +92,7 @@ func (handler *AuthHandler) Refresh(ctx *fiber.Ctx) error {
 	username, _ := claims["username"].(string)
 	name, _ := claims["name"].(string)
 
-	accessToken, _ := helper.GenerateAccessToken(entity.User{
+	accessToken, _ := util.GenerateAccessToken(entity.User{
 		Id:       userID,
 		Username: username,
 		Name:     name,
@@ -139,7 +129,7 @@ func (handler *AuthHandler) Me(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusUnauthorized, "access token required")
 	}
 
-	claims, err := helper.ParseToken(accessToken, false)
+	claims, err := util.ParseToken(accessToken, false)
 	if err != nil {
 		return errorResponse(ctx, fiber.StatusUnauthorized, "invalid access token")
 	}
@@ -180,7 +170,7 @@ func (handler *AuthHandler) Me(ctx *fiber.Ctx) error {
 func (handler *AuthHandler) Logout(ctx *fiber.Ctx) error {
 	refreshToken := ctx.Cookies("refresh_token")
 
-	helper.BlacklistToken(refreshToken)
+	util.BlacklistToken(refreshToken)
 
 	clearAuthCookies(ctx)
 

@@ -1,0 +1,24 @@
+{
+  "app": {
+    "name": "Go Fiber Service"
+  },
+  "web": {
+    "prefork": false,
+    "port": 3000
+  },
+  "log": {
+    "level": 6
+  },
+  "database": {
+    "username": "postgres",
+    "password": "root",
+    "host": "localhost",
+    "port": 5432,
+    "name": "go-fiber-service",
+    "pool": {
+      "idle": 10,
+      "max": 100,
+      "lifetime": 300
+    }
+  }
+}

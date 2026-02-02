@@ -528,6 +528,9 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "email_verified_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },

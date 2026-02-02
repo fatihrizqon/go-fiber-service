@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/fatihrizqon/go-fiber-service/helper"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -32,7 +32,7 @@ func JWT(c *fiber.Ctx) error {
 		return jwtSecret, nil
 	})
 
-	if err != nil || !parsedToken.Valid || helper.IsBlacklisted(token) {
+	if err != nil || !parsedToken.Valid || util.IsBlacklisted(token) {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token"})
 	}
 

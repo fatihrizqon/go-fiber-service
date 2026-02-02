@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/fatihrizqon/go-fiber-service/helper"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/request"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/response"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/request"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
 	"github.com/fatihrizqon/go-fiber-service/internal/repository"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -47,7 +47,7 @@ func (e *AuthService) Login(req request.LoginRequest) (response.LoginResponse, e
 		return res, errors.New("credentials does not matches our record")
 	}
 
-	token, err := helper.GenerateRefreshToken(result)
+	token, err := util.GenerateRefreshToken(result)
 	if err != nil {
 		return res, fmt.Errorf("failed to generate token: %w", err)
 	}

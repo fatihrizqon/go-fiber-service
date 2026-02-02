@@ -155,7 +155,7 @@ go test ./...
 ```
 ├── config/
 ├── docs/          # Swagger generated files
-├── helper/
+├── util/
 ├── internal/
 │   ├── handler/
 │   ├── service/

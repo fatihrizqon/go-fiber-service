@@ -1,4 +1,4 @@
-package helper
+package util
 
 type SearchOptions struct {
 	Fields []string

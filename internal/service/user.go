@@ -4,11 +4,11 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/fatihrizqon/go-fiber-service/helper"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/request"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/request"
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/response"
 	"github.com/fatihrizqon/go-fiber-service/internal/repository"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -16,7 +16,7 @@ import (
 
 type IUserService interface {
 	Create(req request.UserCreateRequest) (entity.User, error)
-	FindAll(page, pageSize int, search string, options helper.SearchOptions, filters entity.UserFilters) ([]response.UserResponse, int, error)
+	FindAll(page, pageSize int, search string, options util.SearchOptions, filters entity.UserFilters) ([]response.UserResponse, int, error)
 	FindById(reqId uuid.UUID) (response.UserResponse, error)
 	Update(req request.UserUpdateRequest) (entity.User, error)
 	Delete(reqId uuid.UUID) (entity.User, error)
@@ -62,7 +62,7 @@ func (e *UserService) Create(req request.UserCreateRequest) (entity.User, error)
 }
 
 // FindAll implements IUserService with pagination.
-func (e *UserService) FindAll(page, pageSize int, search string, options helper.SearchOptions, filters entity.UserFilters) ([]response.UserResponse, int, error) {
+func (e *UserService) FindAll(page, pageSize int, search string, options util.SearchOptions, filters entity.UserFilters) ([]response.UserResponse, int, error) {
 	var resps []response.UserResponse
 	entities, totalCount, err := e.IUserRepository.FindAll(page, pageSize, search, options, filters)
 

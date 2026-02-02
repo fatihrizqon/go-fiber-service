@@ -1,9 +1,9 @@
-package helper
+package util
 
 import (
 	"fmt"
 
-	"github.com/fatihrizqon/go-fiber-service/internal/presenter/response"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
 )
 
 func GenerateMeta(baseURL, search string, page, pageSize, totalCount int, filters map[string]string) response.Meta {
@@ -18,7 +18,6 @@ func GenerateMeta(baseURL, search string, page, pageSize, totalCount int, filter
 		if search != "" {
 			query += "&search=" + search
 		}
-		// Add filters to the query
 		for key, value := range filters {
 			query += fmt.Sprintf("&%s=%s", key, value)
 		}

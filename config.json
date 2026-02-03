@@ -11,14 +11,18 @@
   },
   "database": {
     "username": "postgres",
-    "password": "root",
+    "password": "password",
     "host": "localhost",
-    "port": 5432,
+    "port": 2025,
     "name": "go-fiber-service",
     "pool": {
       "idle": 10,
       "max": 100,
       "lifetime": 300
     }
+  },
+  "notifier": {
+    "provider": "discord",
+    "webhook": "https://discord.com/api/webhooks/1293823988316901386/SJhJv_wvyYX36DRFwQJyfZtHH5BVKatSRFzr5tdsPWslri87_dFLbNL16zkHZ7wZtBrh"
   }
 }

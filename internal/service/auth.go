@@ -38,6 +38,7 @@ func (e *AuthService) Login(req request.LoginRequest) (response.LoginResponse, e
 	var res response.LoginResponse
 
 	result, err := e.IAuthRepository.Login(req.Email)
+
 	if err != nil {
 		return res, err
 	}

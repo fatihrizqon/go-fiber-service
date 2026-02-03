@@ -37,9 +37,11 @@ func NewDatabase(viper *viper.Viper, log *logrus.Logger) *gorm.DB {
 			LogLevel:                  logger.Info,
 		}),
 	})
+
 	util.PanicIfError(err)
 
 	sqlDB, err := db.DB()
+
 	util.PanicIfError(err)
 
 	sqlDB.SetMaxIdleConns(maxIdle)

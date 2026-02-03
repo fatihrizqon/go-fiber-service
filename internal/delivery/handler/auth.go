@@ -43,8 +43,8 @@ func (handler *AuthHandler) Login(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusUnauthorized, "authentication failed: "+err.Error())
 	}
 
-	accessToken, _ := util.GenerateAccessToken(result.User)
-	refreshToken, _ := util.GenerateRefreshToken(result.User)
+	accessToken, _ := util.CreateToken(result.User)
+	refreshToken, _ := util.RefreshToken(result.User)
 
 	setAuthCookies(ctx, accessToken, refreshToken)
 

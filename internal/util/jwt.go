@@ -1,31 +1,22 @@
 package util
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/spf13/viper"
 )
 
-var jwtSecret []byte
-var refreshSecret []byte
-
-func NewJWT(v *viper.Viper) {
-	access := v.GetString("jwt.secret")
-	refresh := v.GetString("jwt.refresh_secret")
-
-	if access == "" || refresh == "" {
-		panic("JWT secret is empty")
-	}
-
-	jwtSecret = []byte(access)
-	refreshSecret = []byte(refresh)
+type JWTService struct {
+	secret        string
+	refreshSecret string
+	expiration    time.Duration
 }
 
-func GenerateAccessToken(user entity.User) (string, error) {
+func (j *JWTService) CreateToken(user *entity.User) (string, error) {
+	secret := []byte(j.secret)
+
 	claims := jwt.MapClaims{
 		"id":       user.Id,
 		"username": user.Username,
@@ -34,57 +25,42 @@ func GenerateAccessToken(user entity.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
+	return token.SignedString(secret)
 }
 
-func GenerateRefreshToken(user entity.User) (string, error) {
+func (j *JWTService) RefreshToken(user *entity.User) (string, error) {
+	refresh_secret := []byte(j.refreshSecret)
+
 	claims := jwt.MapClaims{
 		"id":       user.Id,
 		"username": user.Username,
 		"name":     user.Name,
-		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
+		"exp":      time.Now().Add(15 * time.Minute).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	return token.SignedString(refreshSecret)
+	return token.SignedString(refresh_secret)
 }
 
-func ParseToken(tokenString string, isRefresh bool) (jwt.MapClaims, error) {
-	secret := jwtSecret
-	if isRefresh {
-		secret = refreshSecret
-	}
+func (j *JWTService) ParseToken(token string) (jwt.MapClaims, error) {
+	jwtSecret := []byte(j.secret)
 
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			return nil, jwt.ErrSignatureInvalid
 		}
-		return secret, nil
+		return jwtSecret, nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+		return claims, nil
 	}
 
-	exp, ok := claims["exp"].(float64)
-	if !ok || time.Now().Unix() > int64(exp) {
-		return nil, fmt.Errorf("token has expired")
-	}
-
-	if _, ok := claims["username"]; !ok {
-		claims["username"] = ""
-	}
-	if _, ok := claims["name"]; !ok {
-		claims["name"] = ""
-	}
-
-	return claims, nil
+	return nil, jwt.ErrInvalidKey
 }
 
 var TokenBlacklist = struct {

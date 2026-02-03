@@ -3,7 +3,7 @@
     "name": "Go Fiber Service"
   },
   "web": {
-    "prefork": true,
+    "prefork": false,
     "port": 3000
   },
   "log": {
@@ -13,7 +13,7 @@
     "username": "postgres",
     "password": "password",
     "host": "localhost",
-    "port": 2025,
+    "port": 5432,
     "name": "go-fiber-service",
     "pool": {
       "idle": 25,

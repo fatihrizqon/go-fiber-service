@@ -48,7 +48,8 @@ func (e *AuthService) Login(req request.LoginRequest) (response.LoginResponse, e
 		return res, errors.New("credentials does not matches our record")
 	}
 
-	token, err := util.GenerateRefreshToken(result)
+	token, err := util.CreateToken(result)
+
 	if err != nil {
 		return res, fmt.Errorf("failed to generate token: %w", err)
 	}

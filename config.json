@@ -3,7 +3,7 @@
     "name": "Go Fiber Service"
   },
   "web": {
-    "prefork": false,
+    "prefork": true,
     "port": 3000
   },
   "log": {
@@ -16,8 +16,8 @@
     "port": 2025,
     "name": "go-fiber-service",
     "pool": {
-      "idle": 10,
-      "max": 100,
+      "idle": 25,
+      "max": 50,
       "lifetime": 300
     }
   },

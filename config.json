@@ -24,5 +24,9 @@
   "notifier": {
     "provider": "discord",
     "webhook": "https://discord.com/api/webhooks/1293823988316901386/SJhJv_wvyYX36DRFwQJyfZtHH5BVKatSRFzr5tdsPWslri87_dFLbNL16zkHZ7wZtBrh"
+  },
+  "jwt": {
+    "secret": "your_secret_key",
+    "refresh_secret": "your_jwt_refresh_secret_key"
   }
 }

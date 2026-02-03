@@ -2,16 +2,28 @@ package util
 
 import (
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/spf13/viper"
 )
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
-var refreshSecret = []byte(os.Getenv("JWT_REFRESH_SECRET"))
+var jwtSecret []byte
+var refreshSecret []byte
+
+func NewJWT(v *viper.Viper) {
+	access := v.GetString("jwt.secret")
+	refresh := v.GetString("jwt.refresh_secret")
+
+	if access == "" || refresh == "" {
+		panic("JWT secret is empty")
+	}
+
+	jwtSecret = []byte(access)
+	refreshSecret = []byte(refresh)
+}
 
 func GenerateAccessToken(user entity.User) (string, error) {
 	claims := jwt.MapClaims{
@@ -21,14 +33,11 @@ func GenerateAccessToken(user entity.User) (string, error) {
 		"exp":      time.Now().Add(15 * time.Minute).Unix(),
 	}
 
-	fmt.Println(claims)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
 }
 
 func GenerateRefreshToken(user entity.User) (string, error) {
-	fmt.Println(user)
 	claims := jwt.MapClaims{
 		"id":       user.Id,
 		"username": user.Username,
@@ -37,6 +46,7 @@ func GenerateRefreshToken(user entity.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	return token.SignedString(refreshSecret)
 }
 

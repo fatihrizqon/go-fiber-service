@@ -6,6 +6,7 @@ import (
 	"github.com/fatihrizqon/go-fiber-service/config"
 	"github.com/fatihrizqon/go-fiber-service/database"
 	"github.com/fatihrizqon/go-fiber-service/internal/notifier"
+	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,6 +22,7 @@ import (
 // @BasePath /
 func main() {
 	viper := config.NewViper()
+
 	log := config.NewLogger(viper)
 
 	var notify notifier.Notifier
@@ -56,6 +58,8 @@ func main() {
 	})
 
 	database.Migrate(db)
+
+	util.NewJWT(viper)
 
 	port := viper.GetInt("web.port")
 

@@ -1,17 +1,23 @@
 package util
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 )
 
 var jwtSecret []byte
 var refreshSecret []byte
+
+type Claims struct {
+	Id string `json:"id"`
+	jwt.RegisteredClaims
+}
 
 func NewJWT(v *viper.Viper) {
 	access := v.GetString("jwt.secret")
@@ -25,7 +31,7 @@ func NewJWT(v *viper.Viper) {
 	refreshSecret = []byte(refresh)
 }
 
-func GenerateAccessToken(user entity.User) (string, error) {
+func CreateToken(user entity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"id":       user.Id,
 		"username": user.Username,
@@ -37,7 +43,7 @@ func GenerateAccessToken(user entity.User) (string, error) {
 	return token.SignedString(jwtSecret)
 }
 
-func GenerateRefreshToken(user entity.User) (string, error) {
+func RefreshToken(user entity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"id":       user.Id,
 		"username": user.Username,
@@ -50,41 +56,30 @@ func GenerateRefreshToken(user entity.User) (string, error) {
 	return token.SignedString(refreshSecret)
 }
 
-func ParseToken(tokenString string, isRefresh bool) (jwt.MapClaims, error) {
-	secret := jwtSecret
-	if isRefresh {
-		secret = refreshSecret
+func ParseToken(tokenString string) (*entity.User, error) {
+	claims := &Claims{}
+
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		claims,
+		func(t *jwt.Token) (interface{}, error) {
+			if t.Method != jwt.SigningMethodHS256 {
+				return nil, fiber.ErrUnauthorized
+			}
+			return []byte(jwtSecret), nil
+		},
+	)
+
+	if err != nil || !token.Valid {
+		return nil, fiber.ErrUnauthorized
 	}
 
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
-		}
-		return secret, nil
-	})
-
+	userID, err := uuid.Parse(claims.Id)
 	if err != nil {
-		return nil, err
+		return nil, fiber.ErrUnauthorized
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
-	exp, ok := claims["exp"].(float64)
-	if !ok || time.Now().Unix() > int64(exp) {
-		return nil, fmt.Errorf("token has expired")
-	}
-
-	if _, ok := claims["username"]; !ok {
-		claims["username"] = ""
-	}
-	if _, ok := claims["name"]; !ok {
-		claims["name"] = ""
-	}
-
-	return claims, nil
+	return &entity.User{Id: userID}, nil
 }
 
 var TokenBlacklist = struct {

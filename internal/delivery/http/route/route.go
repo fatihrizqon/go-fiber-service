@@ -8,9 +8,10 @@ import (
 )
 
 type RouteConfig struct {
-	App         *fiber.App
-	UserHandler *handler.UserHandler
-	AuthHandler *handler.AuthHandler
+	App           *fiber.App
+	UserHandler   *handler.UserHandler
+	AuthHandler   *handler.AuthHandler
+	AuthMiddlware fiber.Handler
 }
 
 func (rc *RouteConfig) Setup() {
@@ -26,9 +27,7 @@ func (rc *RouteConfig) SetupGuestRoute() {
 }
 
 func (rc *RouteConfig) SetupAuthRoute() {
-	rc.App.Post("/api/v1/auth/refresh", rc.AuthHandler.Refresh)
-	rc.App.Post("/api/v1/auth/me", rc.AuthHandler.Me)
-
+	rc.App.Use(rc.AuthMiddlware)
 	rc.App.Post("api/v1/users", rc.UserHandler.Create)
 	rc.App.Get("api/v1/users", rc.UserHandler.FindAll)
 	rc.App.Get("api/v1/users/:id", rc.UserHandler.FindById)

@@ -13,7 +13,6 @@ import (
 )
 
 type IAuthService interface {
-	Register(req request.RegisterRequest) (response.RegisterResponse, error)
 	Login(req request.LoginRequest) (response.LoginResponse, error)
 }
 type AuthService struct {
@@ -26,11 +25,6 @@ func NewAuthService(repo repository.IAuthRepository, validate *validator.Validat
 		IAuthRepository: repo,
 		validate:        validate,
 	}
-}
-
-// Register implements IAuthService.
-func (e *AuthService) Register(req request.RegisterRequest) (response.RegisterResponse, error) {
-	panic("unimplemented")
 }
 
 // Login implements IAuthService.
@@ -48,7 +42,7 @@ func (e *AuthService) Login(req request.LoginRequest) (response.LoginResponse, e
 		return res, errors.New("credentials does not matches our record")
 	}
 
-	token, err := util.GenerateRefreshToken(result)
+	token, err := util.CreateToken(result)
 	if err != nil {
 		return res, fmt.Errorf("failed to generate token: %w", err)
 	}
@@ -62,4 +56,22 @@ func (e *AuthService) Login(req request.LoginRequest) (response.LoginResponse, e
 // ValidatePassword compares a plain password with a hashed password
 func ValidatePassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func (e *AuthService) Verify(req *request.VerifyUserRequest) (response.AuthResponse, error) {
+	var res response.AuthResponse
+
+	claims, err := util.ParseToken(req.Token)
+	if err != nil {
+		return res, fmt.Errorf("failed to parse token: %w", err)
+	}
+
+	user, err := e.IAuthRepository.Login(claims.Email)
+	if err != nil {
+		return res, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return response.AuthResponse{
+		ID: user.Id,
+	}, nil
 }

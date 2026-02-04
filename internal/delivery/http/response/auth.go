@@ -20,3 +20,7 @@ type LoginResponse struct {
 	Token string      `json:"token"`
 	User  entity.User `json:"user"`
 }
+
+type AuthResponse struct {
+	ID uuid.UUID `json:"id"`
+}

@@ -10,3 +10,7 @@ type RegisterRequest struct {
 	Email    string `validate:"required,min=1" json:"email"`
 	Password string `validate:"required,min=8" json:"password"`
 }
+
+type VerifyUserRequest struct {
+	Token string `validate:"required,max=100"`
+}

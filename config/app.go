@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/fatihrizqon/go-fiber-service/internal/delivery/handler"
+	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/middleware"
 	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/route"
 	"github.com/fatihrizqon/go-fiber-service/internal/repository"
 	"github.com/fatihrizqon/go-fiber-service/internal/service"
@@ -33,10 +34,14 @@ func Bootstrap(config *BootstrapConfig) {
 	userHandler := handler.NewUserHandler(userService)
 	authHandler := handler.NewAuthHandler(authService)
 
+	// Setup middleware
+	authMiddleware := middleware.NewAuth()
+
 	routeConfig := route.RouteConfig{
-		App:         config.App,
-		UserHandler: userHandler,
-		AuthHandler: authHandler,
+		App:           config.App,
+		UserHandler:   userHandler,
+		AuthHandler:   authHandler,
+		AuthMiddlware: authMiddleware,
 	}
 
 	routeConfig.Setup()

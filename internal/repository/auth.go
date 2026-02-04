@@ -8,7 +8,6 @@ import (
 )
 
 type IAuthRepository interface {
-	Register(entity entity.User) (entity.User, error)
 	Login(username string) (entity.User, error)
 }
 
@@ -18,11 +17,6 @@ type AuthRepository struct {
 
 func NewAuthRepository(Db *gorm.DB) IAuthRepository {
 	return &AuthRepository{Db: Db}
-}
-
-// Register implements IAuthRepository.
-func (e *AuthRepository) Register(entity entity.User) (entity.User, error) {
-	panic("unimplemented")
 }
 
 // Login implements IAuthRepository.

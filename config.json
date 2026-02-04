@@ -3,7 +3,7 @@
     "name": "Go Fiber Service"
   },
   "web": {
-    "prefork": true,
+    "prefork": false,
     "port": 3000
   },
   "log": {

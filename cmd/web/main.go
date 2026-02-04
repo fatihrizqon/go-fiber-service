@@ -5,9 +5,6 @@ import (
 
 	"github.com/fatihrizqon/go-fiber-service/config"
 	"github.com/fatihrizqon/go-fiber-service/database"
-	"github.com/fatihrizqon/go-fiber-service/internal/notifier"
-	"github.com/fatihrizqon/go-fiber-service/internal/util"
-	"github.com/sirupsen/logrus"
 )
 
 // @title Go REST API with Fiber Framework
@@ -22,32 +19,11 @@ import (
 // @BasePath /
 func main() {
 	viper := config.NewViper()
-
 	log := config.NewLogger(viper)
-
-	var notify notifier.Notifier
-
-	switch viper.GetString("notifier.provider") {
-	case "discord":
-		notify = notifier.NewDiscord(viper.GetString("notifier.webhook"))
-	case "slack":
-		notify = notifier.NewSlack(viper.GetString("notifier.webhook"))
-	}
-
-	if notify != nil {
-		log.AddHook(&notifier.Hook{
-			Notifier: notify,
-			LogLevels: []logrus.Level{
-				logrus.ErrorLevel,
-				logrus.FatalLevel,
-				logrus.PanicLevel,
-			},
-		})
-	}
-
 	db := config.NewDatabase(viper, log)
 	validate := config.NewValidator(viper)
 	app := config.NewFiber(viper, log)
+	jwt := config.NewJWT(viper, log)
 
 	config.Bootstrap(&config.BootstrapConfig{
 		DB:       db,
@@ -55,11 +31,12 @@ func main() {
 		Log:      log,
 		Validate: validate,
 		Config:   viper,
+		JWT:      jwt,
 	})
 
 	database.Migrate(db)
 
-	util.NewJWT(viper)
+	config.NewNotifier(viper, log)
 
 	port := viper.GetInt("web.port")
 

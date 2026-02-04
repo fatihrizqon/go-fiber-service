@@ -13,7 +13,7 @@
     "username": "postgres",
     "password": "password",
     "host": "localhost",
-    "port": 2025,
+    "port": 5432,
     "name": "go-fiber-service",
     "pool": {
       "idle": 25,

@@ -19,6 +19,7 @@ type BootstrapConfig struct {
 	Log      *logrus.Logger
 	Validate *validator.Validate
 	Config   *viper.Viper
+	JWT      *JWTService
 }
 
 func Bootstrap(config *BootstrapConfig) {

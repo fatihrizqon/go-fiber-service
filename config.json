@@ -11,9 +11,9 @@
   },
   "database": {
     "username": "postgres",
-    "password": "password",
+    "password": "root",
     "host": "localhost",
-    "port": 5432,
+    "port": 2025,
     "name": "go-fiber-service",
     "pool": {
       "idle": 25,

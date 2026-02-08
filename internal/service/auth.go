@@ -3,75 +3,160 @@ package service
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/request"
-	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
+	"github.com/fatihrizqon/go-fiber-service/internal/entity"
 	"github.com/fatihrizqon/go-fiber-service/internal/repository"
 	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type IAuthService interface {
-	Login(req request.LoginRequest) (response.LoginResponse, error)
-}
-type AuthService struct {
-	IAuthRepository repository.IAuthRepository
-	validate        *validator.Validate
+type AuthResult struct {
+	AccessToken  string
+	RefreshToken string
+	User         entity.User
 }
 
-func NewAuthService(repo repository.IAuthRepository, validate *validator.Validate) IAuthService {
+type IAuthService interface {
+	Login(req request.LoginRequest) (AuthResult, error)
+	RefreshToken(refreshToken string) (AuthResult, error)
+	Logout(refreshToken string) error
+}
+
+type AuthService struct {
+	IAuthRepository  repository.IAuthRepository
+	ITokenRepository repository.ITokenRepository
+	validate         *validator.Validate
+}
+
+func NewAuthService(
+	authRepo repository.IAuthRepository,
+	tokenRepo repository.ITokenRepository,
+	validate *validator.Validate,
+) IAuthService {
 	return &AuthService{
-		IAuthRepository: repo,
-		validate:        validate,
+		IAuthRepository:  authRepo,
+		ITokenRepository: tokenRepo,
+		validate:         validate,
 	}
 }
 
-// Login implements IAuthService.
-func (e *AuthService) Login(req request.LoginRequest) (response.LoginResponse, error) {
-	var res response.LoginResponse
+func (e *AuthService) Login(req request.LoginRequest) (AuthResult, error) {
+	var res AuthResult
 
-	result, err := e.IAuthRepository.Login(req.Email)
-
+	user, err := e.IAuthRepository.Login(req.Email)
 	if err != nil {
 		return res, err
 	}
 
-	err = ValidatePassword(req.Password, result.Password)
-	if err != nil {
+	if err := ValidatePassword(req.Password, user.Password); err != nil {
 		return res, errors.New("credentials does not matches our record")
 	}
 
-	token, err := util.CreateToken(result)
-	if err != nil {
-		return res, fmt.Errorf("failed to generate token: %w", err)
+	session := entity.Session{
+		ID:     util.GenerateUUID(),
+		UserID: user.Id,
 	}
 
-	return response.LoginResponse{
-		Token: token,
-		User:  result,
+	session, err = e.ITokenRepository.CreateSession(session)
+	if err != nil {
+		return res, err
+	}
+
+	accessToken, err := util.CreateAccessToken(user, session.ID)
+	if err != nil {
+		return res, fmt.Errorf("failed to generate access token: %w", err)
+	}
+
+	refreshToken, err := util.CreateRefreshToken(user, session.ID)
+	if err != nil {
+		return res, fmt.Errorf("failed to generate refresh token: %w", err)
+	}
+
+	credential := entity.Credential{
+		ID:           util.GenerateUUID(),
+		SessionID:    session.ID,
+		Type:         "REFRESH_TOKEN",
+		RefreshToken: refreshToken,
+		ExpiresAt:    time.Now().Add(15 * time.Minute),
+	}
+
+	if err := e.ITokenRepository.CreateCredential(credential); err != nil {
+		return res, err
+	}
+
+	return AuthResult{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User:         user,
 	}, nil
 }
 
-// ValidatePassword compares a plain password with a hashed password
+func (e *AuthService) RefreshToken(refreshToken string) (AuthResult, error) {
+	oldCredential, err := e.ITokenRepository.FindCredentialByToken(refreshToken)
+	if err != nil {
+		return AuthResult{}, errors.New("invalid or revoked refresh token")
+	}
+
+	session, err := e.ITokenRepository.FindSessionByID(oldCredential.SessionID)
+	if err != nil {
+		return AuthResult{}, errors.New("session revoked or not found")
+	}
+
+	accessToken, err := util.CreateAccessToken(session.User, session.ID)
+	if err != nil {
+		return AuthResult{}, fmt.Errorf("failed to generate access token: %w", err)
+	}
+
+	newRefreshToken, err := util.CreateRefreshToken(session.User, session.ID)
+	if err != nil {
+		return AuthResult{}, fmt.Errorf("failed to generate refresh token: %w", err)
+	}
+
+	newCredential := entity.Credential{
+		ID:           util.GenerateUUID(),
+		SessionID:    session.ID,
+		Type:         "REFRESH_TOKEN",
+		RefreshToken: newRefreshToken,
+		ExpiresAt:    time.Now().Add(15 * time.Minute),
+	}
+
+	if err := e.ITokenRepository.RevokeCredentialByID(oldCredential.ID); err != nil {
+		return AuthResult{}, fmt.Errorf("failed to revoke old refresh token: %w", err)
+	}
+
+	if err := e.ITokenRepository.CreateCredential(newCredential); err != nil {
+		return AuthResult{}, fmt.Errorf("failed to save new refresh token: %w", err)
+	}
+
+	return AuthResult{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+		User:         session.User,
+	}, nil
+}
+
+func (e *AuthService) Logout(refreshToken string) error {
+	credential, err := e.ITokenRepository.FindCredentialByToken(refreshToken)
+	if err != nil {
+		return err
+	}
+	if err := e.ITokenRepository.RevokeCredentialByID(credential.ID); err != nil {
+		return err
+	}
+
+	if err := e.ITokenRepository.RevokeSession(credential.SessionID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ValidatePassword(password, hashedPassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-}
-
-func (e *AuthService) Verify(req *request.VerifyUserRequest) (response.AuthResponse, error) {
-	var res response.AuthResponse
-
-	claims, err := util.ParseToken(req.Token)
-	if err != nil {
-		return res, fmt.Errorf("failed to parse token: %w", err)
-	}
-
-	user, err := e.IAuthRepository.Login(claims.Email)
-	if err != nil {
-		return res, fmt.Errorf("failed to get user: %w", err)
-	}
-
-	return response.AuthResponse{
-		ID: user.Id,
-	}, nil
+	return bcrypt.CompareHashAndPassword(
+		[]byte(hashedPassword),
+		[]byte(password),
+	)
 }

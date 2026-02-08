@@ -5,6 +5,7 @@ import (
 
 	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/request"
 	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/response"
+	"github.com/fatihrizqon/go-fiber-service/internal/helper"
 	"github.com/fatihrizqon/go-fiber-service/internal/service"
 	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/gofiber/fiber/v2"
@@ -12,6 +13,7 @@ import (
 
 type AuthHandler struct {
 	IAuthService service.IAuthService
+	Cookie       helper.RefreshCookie
 }
 
 func NewAuthHandler(serv service.IAuthService) *AuthHandler {
@@ -32,14 +34,18 @@ func NewAuthHandler(serv service.IAuthService) *AuthHandler {
 func (handler *AuthHandler) Login(ctx *fiber.Ctx) error {
 	var req request.LoginRequest
 	if err := ctx.BodyParser(&req); err != nil {
-		return errorResponse(ctx, fiber.StatusBadRequest, "invalid request format")
+		util.HandleError(ctx, fiber.StatusBadRequest, err)
+		return nil
 	}
 
 	result, err := handler.IAuthService.Login(req)
 
 	if err != nil {
-		return errorResponse(ctx, fiber.StatusUnauthorized, "authentication failed: "+err.Error())
+		util.HandleError(ctx, fiber.StatusUnauthorized, err)
+		return nil
 	}
+
+	handler.Cookie.Set(ctx, "refresh_token", result.RefreshToken)
 
 	return ctx.Status(fiber.StatusOK).JSON(response.AuthJSON{
 		Message: "you are authenticated",
@@ -52,14 +58,51 @@ func (handler *AuthHandler) Login(ctx *fiber.Ctx) error {
 			Status:          result.User.Status,
 			EmailVerifiedAt: result.User.EmailVerifiedAt.Format(time.RFC3339),
 		},
-		AccessToken: result.Token,
+		AccessToken: result.AccessToken,
 	})
 }
 
-func errorResponse(ctx *fiber.Ctx, status int, message string) error {
-	return ctx.Status(status).JSON(response.JSON{
-		Status:  status,
-		Message: message,
+// Refresh godoc
+// @Summary Refresh access token
+// @Description Generate new access token and rotate refresh token
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} response.AuthJSON
+// @Failure 401 {object} response.JSON "Unauthorized"
+// @Router /api/v1/auth/refresh [post]
+func (handler *AuthHandler) Refresh(ctx *fiber.Ctx) error {
+	refreshToken := ctx.Cookies("refresh_token")
+	if refreshToken == "" {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.JSON{
+			Status:  fiber.StatusUnauthorized,
+			Message: "missing refresh token",
+		})
+	}
+
+	handler.Cookie.Clear(ctx, "refresh_token")
+
+	result, err := handler.IAuthService.RefreshToken(refreshToken)
+	if err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.JSON{
+			Status:  fiber.StatusUnauthorized,
+			Message: err.Error(),
+		})
+	}
+
+	handler.Cookie.Set(ctx, "refresh_token", result.RefreshToken)
+
+	return ctx.Status(fiber.StatusOK).JSON(response.AuthJSON{
+		Status:  fiber.StatusOK,
+		Message: "token refreshed",
+		User: response.UserInfo{
+			Id:              result.User.Id,
+			Username:        result.User.Username,
+			Name:            result.User.Name,
+			Email:           result.User.Email,
+			Status:          result.User.Status,
+			EmailVerifiedAt: result.User.EmailVerifiedAt.Format(time.RFC3339),
+		},
+		AccessToken: result.AccessToken,
 	})
 }
 
@@ -73,10 +116,21 @@ func errorResponse(ctx *fiber.Ctx, status int, message string) error {
 // @Router /api/v1/auth/logout [post]
 func (handler *AuthHandler) Logout(ctx *fiber.Ctx) error {
 	refreshToken := ctx.Cookies("refresh_token")
+	if refreshToken == "" {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.JSON{
+			Status:  fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
+	}
 
-	util.BlacklistToken(refreshToken)
+	if err := handler.IAuthService.Logout(refreshToken); err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.JSON{
+			Status:  fiber.StatusUnauthorized,
+			Message: err.Error(),
+		})
+	}
 
-	// clearAuthCookies(ctx)
+	handler.Cookie.Clear(ctx, "refresh_token")
 
 	return ctx.Status(fiber.StatusOK).JSON(response.JSON{
 		Status:  fiber.StatusOK,
@@ -85,47 +139,6 @@ func (handler *AuthHandler) Logout(ctx *fiber.Ctx) error {
 }
 
 /*
-// setAuthCookies sets access & refresh tokens as HttpOnly cookies
-func setAuthCookies(ctx *fiber.Ctx, accessToken, refreshToken string) {
-	ctx.Cookie(&fiber.Cookie{
-		Name:     "access_token",
-		Value:    accessToken,
-		Expires:  time.Now().Add(15 * time.Minute),
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Lax",
-	})
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Lax",
-	})
-}
-
-func clearAuthCookies(ctx *fiber.Ctx) {
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "access_token",
-		Expires: time.Now().Add(-1 * time.Hour),
-	})
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "refresh_token",
-		Expires: time.Now().Add(-1 * time.Hour),
-	})
-}
-
-func parseUserIDFromClaims(claims map[string]interface{}) (uuid.UUID, error) {
-	idStr, ok := claims["id"].(string)
-	if !ok {
-		return uuid.UUID{}, fiber.ErrInternalServerError
-	}
-	return uuid.Parse(idStr)
-}
-
 
 // Refresh Token godoc
 // @Summary Refresh access token
@@ -140,35 +153,28 @@ func parseUserIDFromClaims(claims map[string]interface{}) (uuid.UUID, error) {
 func (handler *AuthHandler) Refresh(ctx *fiber.Ctx) error {
 	refreshToken := ctx.Cookies("refresh_token")
 	if refreshToken == "" {
-		return errorResponse(ctx, fiber.StatusUnauthorized, "refresh token required")
+		util.HandleError(ctx, fiber.StatusUnauthorized, fmt.Errorf("refresh token required"))
+		return nil
 	}
 
-	claims, err := util.ParseToken(refreshToken, true)
+	claims, err := util.ParseToken(refreshToken)
 	if err != nil {
-		return errorResponse(ctx, fiber.StatusUnauthorized, "invalid refresh token")
+		util.HandleError(ctx, fiber.StatusUnauthorized, fmt.Errorf("invalid refresh token"))
+		return nil
 	}
 
-	userID, err := parseUserIDFromClaims(claims)
-	if err != nil {
-		return errorResponse(ctx, fiber.StatusInternalServerError, "invalid user ID")
-	}
-
-	username, _ := claims["username"].(string)
-	name, _ := claims["name"].(string)
-
-	accessToken, _ := util.CreateToken(entity.User{
-		Id:       userID,
-		Username: username,
-		Name:     name,
+	refreshToken, _ = util.CreateToken(entity.User{
+		Id: uuid.MustParse(claims.UserID),
 	})
 
-	setAuthCookies(ctx, accessToken, refreshToken)
+	// setAuthCookies(ctx, accessToken, refreshToken)
 
 	return ctx.Status(fiber.StatusOK).JSON(response.JSON{
 		Status:  fiber.StatusOK,
 		Message: "Access token refreshed",
 	})
 }
+
 
 // Get User Info godoc
 // @Summary Get authenticated user info

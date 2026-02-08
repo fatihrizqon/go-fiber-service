@@ -26,23 +26,23 @@ func Bootstrap(config *BootstrapConfig) {
 	// Initialize repositories
 	userRepository := repository.NewUserRepository(config.DB)
 	authRepository := repository.NewAuthRepository(config.DB)
+	tokenRepository := repository.NewTokenRepository(config.DB)
 
 	// Initialize services
 	userService := service.NewUserService(userRepository, config.Validate)
-	authService := service.NewAuthService(authRepository, config.Validate)
-
+	authService := service.NewAuthService(authRepository, tokenRepository, config.Validate)
 	// Initialize handlers
 	userHandler := handler.NewUserHandler(userService)
 	authHandler := handler.NewAuthHandler(authService)
 
 	// Setup middleware
-	authMiddleware := middleware.NewAuth()
+	authMiddleware := middleware.NewAuth(tokenRepository)
 
 	routeConfig := route.RouteConfig{
-		App:           config.App,
-		UserHandler:   userHandler,
-		AuthHandler:   authHandler,
-		AuthMiddlware: authMiddleware,
+		App:            config.App,
+		UserHandler:    userHandler,
+		AuthHandler:    authHandler,
+		AuthMiddleware: authMiddleware,
 	}
 
 	routeConfig.Setup()

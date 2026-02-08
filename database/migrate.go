@@ -6,6 +6,6 @@ import (
 )
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&entity.User{})
+	db.AutoMigrate(&entity.User{}, &entity.Session{}, &entity.Credential{})
 	seedDefaultUser(db)
 }

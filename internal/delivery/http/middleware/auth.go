@@ -1,47 +1,51 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
-	"github.com/fatihrizqon/go-fiber-service/internal/delivery/http/request"
+	"github.com/fatihrizqon/go-fiber-service/internal/repository"
 	"github.com/fatihrizqon/go-fiber-service/internal/util"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
-func NewAuth() fiber.Handler {
+func NewAuth(tokenRepo repository.ITokenRepository) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		authHeader := ctx.Get("Authorization", "")
 		if authHeader == "" {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "authorization header missing",
-				"status":  fiber.StatusUnauthorized,
-			})
+			util.HandleError(ctx, fiber.StatusUnauthorized, fmt.Errorf("missing authorization header"))
+			return nil
 		}
 
-		// Expect: "Bearer <token>"
 		const bearerPrefix = "Bearer "
 		if !strings.HasPrefix(authHeader, bearerPrefix) {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "invalid authorization format",
-				"status":  fiber.StatusUnauthorized,
-			})
+			util.HandleError(ctx, fiber.StatusUnauthorized, fmt.Errorf("invalid authorization format"))
+			return nil
 		}
 
 		token := strings.TrimPrefix(authHeader, bearerPrefix)
 
-		req := &request.VerifyUserRequest{
-			Token: token,
-		}
-
-		auth, err := util.ParseToken(req.Token)
+		claims, err := util.ParseAccessToken(token)
 		if err != nil {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "unauthorized: " + err.Error(),
-				"status":  fiber.StatusUnauthorized,
-			})
+			util.HandleError(ctx, fiber.StatusUnauthorized, err)
+			return nil
 		}
 
-		ctx.Locals("auth", auth)
+		sessionID := claims.SessionID
+		if sessionID == uuid.Nil {
+			util.HandleError(ctx, fiber.StatusUnauthorized, fmt.Errorf("invalid token claims"))
+			return nil
+		}
+
+		if _, err := tokenRepo.FindSessionByID(sessionID); err != nil {
+			util.HandleError(ctx, fiber.StatusUnauthorized, fmt.Errorf("session revoked"))
+			return nil
+		}
+
+		ctx.Locals("auth", claims)
+		ctx.Locals("session_id", sessionID)
+
 		return ctx.Next()
 	}
 }

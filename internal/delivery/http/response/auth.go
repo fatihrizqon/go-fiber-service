@@ -17,8 +17,9 @@ type RegisterResponse struct {
 }
 
 type LoginResponse struct {
-	Token string      `json:"token"`
-	User  entity.User `json:"user"`
+	AccessToken  string      `json:"access_token"`
+	RefreshToken string      `json:"refresh_token"`
+	User         entity.User `json:"user"`
 }
 
 type AuthResponse struct {

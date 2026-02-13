@@ -14,6 +14,7 @@ import (
 )
 
 type BootstrapConfig struct {
+	Cors     *CORSConfig
 	DB       *gorm.DB
 	App      *fiber.App
 	Log      *logrus.Logger
@@ -23,6 +24,9 @@ type BootstrapConfig struct {
 }
 
 func Bootstrap(config *BootstrapConfig) {
+	// Register CORS middleware
+	config.App.Use(config.Cors.Handler())
+
 	// Initialize repositories
 	userRepository := repository.NewUserRepository(config.DB)
 	authRepository := repository.NewAuthRepository(config.DB)

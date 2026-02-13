@@ -19,6 +19,7 @@ import (
 // @BasePath /
 func main() {
 	viper := config.NewViper()
+	cors := config.NewCORS(viper)
 	log := config.NewLogger(viper)
 	db := config.NewDatabase(viper, log)
 	validate := config.NewValidator(viper)
@@ -26,6 +27,7 @@ func main() {
 	jwt := config.NewJWT(viper, log)
 
 	config.Bootstrap(&config.BootstrapConfig{
+		Cors:     cors,
 		DB:       db,
 		App:      app,
 		Log:      log,

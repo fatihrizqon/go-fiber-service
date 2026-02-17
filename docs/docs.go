@@ -92,41 +92,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/me": {
-            "get": {
-                "description": "Retrieve the current authenticated user's information using the access token stored in HttpOnly cookie or Authorization header.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Get authenticated user info",
-                "responses": {
-                    "200": {
-                        "description": "User info retrieved",
-                        "schema": {
-                            "$ref": "#/definitions/response.AuthJSON"
-                        }
-                    },
-                    "401": {
-                        "description": "Invalid or missing access token",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSON"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/auth/refresh": {
             "post": {
-                "description": "Refresh the access token using the refresh token from HttpOnly cookie",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Generate new access token and rotate refresh token",
                 "produces": [
                     "application/json"
                 ],
@@ -136,19 +104,13 @@ const docTemplate = `{
                 "summary": "Refresh access token",
                 "responses": {
                     "200": {
-                        "description": "Access token refreshed",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.JSON"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request format",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSON"
+                            "$ref": "#/definitions/response.AuthJSON"
                         }
                     },
                     "401": {
-                        "description": "Invalid or missing refresh token",
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.JSON"
                         }

@@ -62,6 +62,15 @@ func (e *UserRepository) FindAll(page, pageSize int, search string, options util
 		query = query.Where("status = ?", *filters.Status)
 	}
 
+	if filters.Verified != nil {
+		verified := strings.ToLower(strings.TrimSpace(*filters.Verified))
+		if verified == "true" {
+			query = query.Where("email_verified_at IS NOT NULL")
+		} else if verified == "false" {
+			query = query.Where("email_verified_at IS NULL")
+		}
+	}
+
 	if err := query.Count(&totalCount).Error; err != nil {
 		return nil, 0, err
 	}

@@ -223,5 +223,9 @@ func (handler *UserHandler) setUserFilters(ctx *fiber.Ctx) entity.UserFilters {
 		filters.Status = &status
 	}
 
+	if verified := ctx.Query("verified"); verified != "" {
+		filters.Verified = &verified
+	}
+
 	return filters
 }

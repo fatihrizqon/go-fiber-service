@@ -27,5 +27,6 @@ func (User) SearchableFields() []string {
 }
 
 type UserFilters struct {
-	Status *string
+	Status   *string
+	Verified *string
 }

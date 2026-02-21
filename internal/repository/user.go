@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"context"
 	"strings"
+	"time"
 
 	"github.com/fatihrizqon/go-fiber-service/internal/entity"
 	"github.com/fatihrizqon/go-fiber-service/internal/util"
@@ -15,6 +17,10 @@ type IUserRepository interface {
 	FindById(entityId uuid.UUID) (entity.User, error)
 	Update(entity.User) error
 	Delete(entityId uuid.UUID) error
+
+	CountAll(ctx context.Context) (int64, error)
+	CountBetween(ctx context.Context, from time.Time, to time.Time) (int64, error)
+	CountVerified(ctx context.Context) (int64, error)
 }
 
 type UserRepository struct {
@@ -121,4 +127,31 @@ func (e *UserRepository) Delete(entityId uuid.UUID) error {
 
 	tx.Commit()
 	return nil
+}
+
+// CountAll implements IUserRepository.
+func (e *UserRepository) CountAll(ctx context.Context) (int64, error) {
+	var count int64
+	if err := e.Db.WithContext(ctx).Model(&entity.User{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// CountBetween(ctx, from time.Time, to time.Time) implements IUserRepository.
+func (e *UserRepository) CountBetween(ctx context.Context, from time.Time, to time.Time) (int64, error) {
+	var count int64
+	if err := e.Db.WithContext(ctx).Model(&entity.User{}).Where("created_at BETWEEN ? AND ?", from, to).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// CountVerified implements IUserRepository.
+func (e *UserRepository) CountVerified(ctx context.Context) (int64, error) {
+	var count int64
+	if err := e.Db.WithContext(ctx).Model(&entity.User{}).Where("email_verified_at IS NOT NULL").Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
